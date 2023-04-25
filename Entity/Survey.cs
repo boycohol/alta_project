@@ -12,7 +12,7 @@ namespace AltaProject.Entity
         public DateTime EndDate { get; set; }
 
         public int ImplementUserId { get; set; }
-        public virtual User ImplementUser { get; set; }
+        public virtual InternalUser ImplementUser { get; set; }
 
         public virtual ICollection<Question> Questions { get; set; }
     }

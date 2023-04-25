@@ -9,6 +9,6 @@ namespace AltaProject.Entity
         public string CommentText { get; set; } 
         
         public int TaskId { get; set; }
-        public virtual Task Task { get; set; }
+        public virtual VisitTask Task { get; set; }
     }
 }

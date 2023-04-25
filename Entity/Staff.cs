@@ -6,13 +6,13 @@ namespace AltaProject.Entity
     {
         [Key]
         public int Id { get; set; }
-        public string Status { get; set; }
+        public bool IsActived { get; set; }
         public float Rate { get; set; }
         public DateTime StartDate { get; set; }
-        public virtual User User { get; set; }
+        public virtual InternalUser User { get; set; }
 
         public int AreaId { get; set; }
         public virtual Area Area { get; set; }
-        public virtual Task Task { get; set; }
+        public virtual VisitTask Task { get; set; }
     }
 }

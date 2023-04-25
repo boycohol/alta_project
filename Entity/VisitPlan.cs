@@ -14,7 +14,7 @@ namespace AltaProject.Entity
         public virtual Time Time { get; set; }
 
         public virtual GuestGroup GuestGroup { get; set; }
-        public virtual User RequestorUser { get; set; }
+        public virtual InternalUser RequestorUser { get; set; }
 
         public int DistributorId { get; set; }
         public virtual Distributor Distributor { get; set; }

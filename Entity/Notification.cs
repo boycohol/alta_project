@@ -10,7 +10,7 @@ namespace AltaProject.Entity
         public string Detail { get; set; }
         
         public int SenderUserId { get; set; }
-        public virtual User SenderUser { get; set; }
+        public virtual InternalUser SenderUser { get; set; }
 
         public virtual ICollection<Receiver> Receivers { get; set; }
     }
