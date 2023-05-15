@@ -9,7 +9,7 @@ namespace AltaProject.Entity
         public bool IsActived { get; set; }
         public float Rate { get; set; }
         public DateTime StartDate { get; set; }
-        public virtual InternalUser User { get; set; }
+        public virtual InternalUser InternalUser { get; set; }
 
         public int AreaId { get; set; }
         public virtual Area Area { get; set; }

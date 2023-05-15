@@ -9,19 +9,19 @@ namespace AltaProject.Data
         {
         }
         public DbSet<Guest> Guests { get; set; }
-        public DbSet<InternalUser> User { get; set; }
+        public DbSet<InternalUser> InternalUsers { get; set; }
+        public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Area> Area { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Distributor> Distributors { get; set; }
         public DbSet<FileImage> File { get; set; }
-        public DbSet<GuestGroup > GuestGroups { get; set; }
+        public DbSet<GuestGroup> GuestGroups { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Question> Questions { get; set; }
-        public DbSet<Receiver> Receivers { get; set; }
-        public DbSet<Staff> Staffs { get; set;}
-        public DbSet<Survey> Surveys { get; set;}
+        public DbSet<Staff> Staffs { get; set; }
+        public DbSet<Survey> Surveys { get; set; }
         public DbSet<VisitTask> Tasks { get; set; }
         public DbSet<Time> Times { get; set; }
         public DbSet<VisitPlan> VisitPlans { get; set; }
@@ -33,12 +33,13 @@ namespace AltaProject.Data
             builder
                 .Entity<InternalUser>(iu =>
                 {
-                    iu.HasOne(iu => iu.Staff).WithOne(iu => iu.User).HasForeignKey<Staff>(iu => iu.Id).HasConstraintName("FK_InternalUser_Staff");
-                    iu.HasOne(iu => iu.Plan).WithOne(iu => iu.RequestorUser).HasForeignKey<VisitPlan>(iu => iu.Id).HasConstraintName("FK_InternalUser_VisitPlan");
-                    iu.HasOne(iu => iu.Task).WithOne(iu => iu.CreatorUser).HasForeignKey<VisitTask>(iu => iu.Id).HasConstraintName("FK_InternalUser_VisitTask");
-                    iu.HasOne(iu => iu.Article).WithOne(iu => iu.CreatorUser).HasForeignKey<Article>(iu => iu.Id).HasConstraintName("FK_InternalUser_Article");
-                    iu.HasMany(iu => iu.Notifications).WithOne(iu => iu.SenderUser).HasForeignKey(iu => iu.SenderUserId).HasConstraintName("FK_InternalUser_Notification");
-                    iu.HasOne(iu => iu.Receiver).WithOne(iu => iu.User).HasForeignKey<Receiver>(iu => iu.UserId).HasConstraintName("FK_InternalUser_Receiver");
+                    iu.HasOne(iu => iu.Staff).WithOne(s => s.InternalUser).HasForeignKey<Staff>(iu => iu.Id).HasConstraintName("FK_InternalUser_Staff");
+                    iu.HasOne(iu => iu.Plan).WithOne(vp => vp.RequestorUser).HasForeignKey<VisitPlan>(iu => iu.Id).HasConstraintName("FK_InternalUser_VisitPlan");
+                    iu.HasMany(iu => iu.Tasks).WithOne(vt => vt.CreatorUser).HasForeignKey(t => t.CreatorUserId).HasConstraintName("FK_InternalUser_VisitTask");
+                    iu.HasOne(iu => iu.Article).WithOne(a => a.CreatorUser).HasForeignKey<Article>(iu => iu.Id).HasConstraintName("FK_InternalUser_Article");
+                    iu.HasMany(iu => iu.SendedNotifications).WithOne(n => n.SenderUser).HasForeignKey(n => n.SenderUserId).HasConstraintName("FK_InternalUser_SendedNotification");
+                    iu.HasOne(iu => iu.Role).WithMany(r => r.InternalUsers).HasForeignKey(iu => iu.RoleId).HasConstraintName("FK_InternalUser_Role");
+                    iu.HasOne(iu => iu.User).WithOne(u => u.InternalUser).HasForeignKey<InternalUser>(iu => iu.Id).HasConstraintName("FK_InternalUser_User");
                 })
                 .Entity<Area>(a =>
                 {
@@ -55,7 +56,7 @@ namespace AltaProject.Data
                 })
                 .Entity<Notification>(n =>
                 {
-                    n.HasMany(n => n.Receivers).WithOne(n => n.Notification).HasForeignKey(n => n.NotificationId).HasConstraintName("FK_Notification_Receiver");
+                    n.HasOne(n => n.UserReceiver).WithMany(u => u.ReceivedNotification).HasForeignKey(n => n.UserReceiverId).HasConstraintName("FK_User_ReceiverNotification");
                 })
                 .Entity<VisitPlan>(vp =>
                 {
@@ -66,7 +67,7 @@ namespace AltaProject.Data
                 {
                     vt.HasOne(vt => vt.AssigneeStaff).WithOne(vt => vt.Task).HasForeignKey<VisitTask>(vt => vt.AssigneeStaffId).HasConstraintName("FK_VisitTask_Staff");
                     vt.HasMany(vt => vt.Files).WithOne(vt => vt.Task).HasForeignKey(vt => vt.TaskId).HasConstraintName("FK_VisitTask_FileImage");
-                    vt.HasMany(vt => vt.Comments).WithOne(vt => vt.Task).HasForeignKey(vt => vt.TaskId).HasConstraintName("FK_VisitTask_Comment");
+                    vt.HasMany(vt => vt.Comments).WithOne(vt => vt.VisitTask).HasForeignKey(vt => vt.TaskId).HasConstraintName("FK_VisitTask_Comment");
                 })
                 .Entity<Survey>(s =>
                 {
@@ -74,7 +75,11 @@ namespace AltaProject.Data
                 })
                 .Entity<Guest>(g =>
                 {
-                    g.HasOne(g => g.Receiver).WithOne(g => g.Guest).HasForeignKey<Receiver>(g => g.GuestId).HasConstraintName("FK_Guest_Receiver");
+                    g.HasOne(g => g.User).WithOne(u => u.Guest).HasForeignKey<Guest>(g => g.Id).HasConstraintName("FK_Guest_User");
+                })
+                .Entity<Comment>(c =>
+                {
+                    c.HasOne(c => c.CommentUser).WithMany(u => u.Comments).HasForeignKey(c => c.CommentUserId).HasConstraintName("FK_User_Comment");
                 });
         }
     }

@@ -34,7 +34,7 @@ namespace AltaProject.Repository.Implement
         public async Task<ResponseModel> SignInAsync(SignInModel signInModel)
         {
             //Check if email is exist?
-            var guest = await context.Guests.SingleOrDefaultAsync(g => g.Email == signInModel.email);
+            var guest = await context.Guests.SingleOrDefaultAsync(g => g.User.Email == signInModel.email);
             if (guest == null)
             {
                 return new ResponseModel(System.Net.HttpStatusCode.BadRequest, "Email is not exist!", null);
@@ -53,7 +53,7 @@ namespace AltaProject.Repository.Implement
         public async Task<ResponseModel> SignUpAsync(SignUpModel signUpModel)
         {
             //Check if user is exist
-            var guest = await context.Guests.SingleOrDefaultAsync(g => g.Email == signUpModel.email);
+            var guest = await context.Guests.SingleOrDefaultAsync(g => g.User.Email == signUpModel.email);
             if (guest != null)
             {
                 return new ResponseModel(System.Net.HttpStatusCode.BadRequest, "Email is exist!", null);
@@ -61,21 +61,25 @@ namespace AltaProject.Repository.Implement
             //Add user in DB
             var newGuest = new Guest()
             {
-                Email = signUpModel.email,
-                Name = signUpModel.name,
-                Password = hashPassword.GetHashPassword(signUpModel.password),
+                User = new User()
+                {
+                    Email = signUpModel.email,
+                    Name = signUpModel.name,
+                },
+                EmailConfirmed = false,
+                Password = hashPassword.GetHashPassword(signUpModel.password)
             };
             context.Guests.Add(newGuest);
 
             //Send Confirm email Link
-            var confirmEmailToken = tokenService.CreateToken("confirm-email-secret-key", newGuest.Email);
+            var confirmEmailToken = tokenService.CreateToken("confirm-email-secret-key", newGuest.User.Email);
             var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
             var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
 
-            string url = $"{configuration["BaseUrl"]}/api/User/confirm-email?email={newGuest.Email}&token={validEmailToken}";
+            string url = $"{configuration["BaseUrl"]}/api/User/confirm-email?email={newGuest.User.Email}&token={validEmailToken}";
 
             string htmlContent = "<h1>Welcome to Auth XBackUp</h1>" + $"<p>Please confirm your email address by <a href='{url}'>Click here</a></p>";
-            var message = new Message(new string[] { newGuest.Email }, "Confirm Email Link", htmlContent);
+            var message = new Message(new string[] { newGuest.User.Email }, "Confirm Email Link", htmlContent);
             var resultSendEmail = await emailService.SendAsync(message);
             await context.SaveChangesAsync();
             return new ResponseModel(System.Net.HttpStatusCode.OK, "Register success! and " + resultSendEmail, null);
@@ -86,7 +90,7 @@ namespace AltaProject.Repository.Implement
             {
                 return new ResponseModel(System.Net.HttpStatusCode.InternalServerError, "email or token is invalid", null);
             }
-            var guest = await context.Guests.SingleOrDefaultAsync(g => g.Email == email);
+            var guest = await context.Guests.SingleOrDefaultAsync(g => g.User.Email == email);
             if (guest == null)
             {
                 return new ResponseModel(System.Net.HttpStatusCode.InternalServerError, "Not found email!", null);
@@ -105,7 +109,7 @@ namespace AltaProject.Repository.Implement
         }
         public async Task<ResponseModel> ForgotPasswordAsync(string email)
         {
-            var guest = await context.Guests.SingleOrDefaultAsync(g => g.Email == email);
+            var guest = await context.Guests.SingleOrDefaultAsync(g => g.User.Email == email);
             if (guest == null)
             {
                 return new ResponseModel(System.Net.HttpStatusCode.NotFound, "Not found email!", null);
@@ -114,16 +118,16 @@ namespace AltaProject.Repository.Implement
             var encodedToken = Encoding.UTF8.GetBytes(token);
             var validEmailToken = WebEncoders.Base64UrlEncode(encodedToken);
 
-            string url = $"{configuration["AppUrl"]}/reset-password?email={guest.Email}&token={validEmailToken}";
+            string url = $"{configuration["AppUrl"]}/reset-password?email={guest.User.Email}&token={validEmailToken}";
 
             string htmlContent = "<h1>Forgot the password?</h1>" + $"<p>Please <a href='{url}'>Click here</a> to set new password</p>";
-            var message = new Message(new string[] { guest.Email }, "Forgot password", htmlContent);
+            var message = new Message(new string[] { guest.User.Email }, "Forgot password", htmlContent);
             var response = await emailService.SendAsync(message);
             return new ResponseModel(System.Net.HttpStatusCode.OK, response, null);
         }
         public async Task<ResponseModel> ResetPasswordAsync(string email, string newPassword, string token)
         {
-            var guest = await context.Guests.SingleOrDefaultAsync(g => g.Email == email);
+            var guest = await context.Guests.SingleOrDefaultAsync(g => g.User.Email == email);
 
             var decodedToken = WebEncoders.Base64UrlDecode(token);
             string normalToken = Encoding.UTF8.GetString(decodedToken);
@@ -146,10 +150,13 @@ namespace AltaProject.Repository.Implement
                 StartDate = DateTime.UtcNow,
                 IsActived = model.isActived,
                 Rate = 0,
-                User = new InternalUser()
+                InternalUser = new InternalUser()
                 {
-                    Email = model.Email,
-                    Name = model.FullName,
+                    User = new User()
+                    {
+                        Email = model.Email,
+                        Name = model.FullName
+                    },
                     RoleId = model.RoleId,
                 },
             };
@@ -167,14 +174,14 @@ namespace AltaProject.Repository.Implement
 
         public async Task<ResponseModel> UpdateUserAsync(StaffModel model)
         {
-            var user = await context.Staffs.FirstOrDefaultAsync(s => s.User.Email == model.Email);
+            var user = await context.Staffs.FirstOrDefaultAsync(s => s.InternalUser.User.Email == model.Email);
             if (user == null)
             {
                 return new ResponseModel(System.Net.HttpStatusCode.BadRequest, "Email not exist!", null);
             }
-            user.User.Name = model.FullName;
-            user.User.Email = model.Email;
-            user.User.RoleId = model.RoleId;
+            user.InternalUser.User.Name = model.FullName;
+            user.InternalUser.User.Email = model.Email;
+            user.InternalUser.RoleId = model.RoleId;
             user.AreaId = model.AreaId;
             user.IsActived = model.isActived;
             await context.SaveChangesAsync();
@@ -207,9 +214,9 @@ namespace AltaProject.Repository.Implement
         {
             var users = await context.Staffs.Where(x =>
                 x.Area.Name.Contains(query) ||
-                x.User.Name.Contains(query) ||
-                x.User.Email.Contains(query) ||
-                x.User.Role.Name.Contains(query)
+                x.InternalUser.User.Name.Contains(query) ||
+                x.InternalUser.User.Email.Contains(query) ||
+                x.InternalUser.Role.Name.Contains(query)
             ).Select(x => mapper.Map<StaffModel>(x)).ToListAsync();
             return new ResponseModel(System.Net.HttpStatusCode.OK, "Success!", users);
         }

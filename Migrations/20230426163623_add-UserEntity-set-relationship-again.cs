@@ -6,7 +6,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace AltaProject.Migrations
 {
-    public partial class addInternalUserfixedUserGuest : Migration
+    public partial class addUserEntitysetrelationshipagain : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -51,6 +51,21 @@ namespace AltaProject.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Distributors",
                 columns: table => new
                 {
@@ -73,26 +88,27 @@ namespace AltaProject.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "User",
+                name: "InternalUsers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Email = table.Column<string>(type: "text", nullable: false),
-                    IsActived = table.Column<bool>(type: "boolean", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "text", nullable: false),
-                    Address = table.Column<string>(type: "text", nullable: false),
-                    RoleId = table.Column<int>(type: "integer", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false),
+                    RoleId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_User", x => x.Id);
+                    table.PrimaryKey("PK_InternalUsers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_User_Roles_RoleId",
+                        name: "FK_InternalUser_Role",
                         column: x => x.RoleId,
                         principalTable: "Roles",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_InternalUser_User",
+                        column: x => x.Id,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -112,7 +128,7 @@ namespace AltaProject.Migrations
                     table.ForeignKey(
                         name: "FK_InternalUser_Article",
                         column: x => x.Id,
-                        principalTable: "User",
+                        principalTable: "InternalUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -133,7 +149,7 @@ namespace AltaProject.Migrations
                     table.ForeignKey(
                         name: "FK_InternalUser_Notification",
                         column: x => x.SenderUserId,
-                        principalTable: "User",
+                        principalTable: "InternalUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -143,7 +159,7 @@ namespace AltaProject.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
+                    IsActived = table.Column<bool>(type: "boolean", nullable: false),
                     Rate = table.Column<float>(type: "real", nullable: false),
                     StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     AreaId = table.Column<int>(type: "integer", nullable: false)
@@ -160,7 +176,7 @@ namespace AltaProject.Migrations
                     table.ForeignKey(
                         name: "FK_InternalUser_Staff",
                         column: x => x.Id,
-                        principalTable: "User",
+                        principalTable: "InternalUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -181,9 +197,9 @@ namespace AltaProject.Migrations
                 {
                     table.PrimaryKey("PK_Surveys", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Surveys_User_ImplementUserId",
+                        name: "FK_Surveys_InternalUsers_ImplementUserId",
                         column: x => x.ImplementUserId,
-                        principalTable: "User",
+                        principalTable: "InternalUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -211,7 +227,7 @@ namespace AltaProject.Migrations
                     table.ForeignKey(
                         name: "FK_InternalUser_VisitPlan",
                         column: x => x.Id,
-                        principalTable: "User",
+                        principalTable: "InternalUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -242,7 +258,7 @@ namespace AltaProject.Migrations
                     table.ForeignKey(
                         name: "FK_InternalUser_VisitTask",
                         column: x => x.Id,
-                        principalTable: "User",
+                        principalTable: "InternalUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -339,19 +355,21 @@ namespace AltaProject.Migrations
                 name: "Guests",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Email = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "text", nullable: false),
-                    Address = table.Column<string>(type: "text", nullable: false),
+                    Address = table.Column<string>(type: "text", nullable: true),
                     EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false),
                     GuestGroupId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Guests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Guest_User",
+                        column: x => x.Id,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Guests_GuestGroups_GuestGroupId",
                         column: x => x.GuestGroupId,
@@ -365,7 +383,7 @@ namespace AltaProject.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: true),
+                    InternalUserId = table.Column<int>(type: "integer", nullable: true),
                     GuestId = table.Column<int>(type: "integer", nullable: true),
                     NotificationId = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -379,8 +397,8 @@ namespace AltaProject.Migrations
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_InternalUser_Receiver",
-                        column: x => x.UserId,
-                        principalTable: "User",
+                        column: x => x.InternalUserId,
+                        principalTable: "InternalUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Notification_Receiver",
@@ -411,6 +429,11 @@ namespace AltaProject.Migrations
                 column: "GuestGroupId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_InternalUsers_RoleId",
+                table: "InternalUsers",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Notifications_SenderUserId",
                 table: "Notifications",
                 column: "SenderUserId");
@@ -427,15 +450,15 @@ namespace AltaProject.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Receivers_InternalUserId",
+                table: "Receivers",
+                column: "InternalUserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Receivers_NotificationId",
                 table: "Receivers",
                 column: "NotificationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Receivers_UserId",
-                table: "Receivers",
-                column: "UserId",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Staffs_AreaId",
@@ -452,11 +475,6 @@ namespace AltaProject.Migrations
                 table: "Tasks",
                 column: "AssigneeStaffId",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_User_RoleId",
-                table: "User",
-                column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_VisitPlans_DistributorId",
@@ -511,7 +529,7 @@ namespace AltaProject.Migrations
                 name: "Distributors");
 
             migrationBuilder.DropTable(
-                name: "User");
+                name: "InternalUsers");
 
             migrationBuilder.DropTable(
                 name: "Times");
@@ -521,6 +539,9 @@ namespace AltaProject.Migrations
 
             migrationBuilder.DropTable(
                 name: "Roles");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

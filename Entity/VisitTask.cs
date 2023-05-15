@@ -13,6 +13,8 @@ namespace AltaProject.Entity
         public DateTime EndDate { get; set; }
         public string Category { get; set; }
         public float Rating { get; set; }
+
+        public int CreatorUserId { get; set; }
         public virtual InternalUser CreatorUser { get; set; }
 
         public int AssigneeStaffId { get; set; }

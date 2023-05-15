@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AltaProject.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20230420190507_add-InternalUser-fixed-User-Guest")]
-    partial class addInternalUserfixedUserGuest
+    [Migration("20230514103627_add_FK_User_Comment")]
+    partial class add_FK_User_Comment
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -89,9 +89,14 @@ namespace AltaProject.Migrations
                     b.Property<int>("TaskId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("TaskId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Comments");
                 });
@@ -152,17 +157,9 @@ namespace AltaProject.Migrations
             modelBuilder.Entity("AltaProject.Entity.Guest", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
                     b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("EmailConfirmed")
@@ -171,15 +168,7 @@ namespace AltaProject.Migrations
                     b.Property<int?>("GuestGroupId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -203,38 +192,16 @@ namespace AltaProject.Migrations
             modelBuilder.Entity("AltaProject.Entity.InternalUser", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsActived")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("RoleId")
+                    b.Property<int>("RoleId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("User");
+                    b.ToTable("InternalUsers");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.Notification", b =>
@@ -256,9 +223,14 @@ namespace AltaProject.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("UserReceiverId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SenderUserId");
+
+                    b.HasIndex("UserReceiverId");
 
                     b.ToTable("Notifications");
                 });
@@ -283,36 +255,6 @@ namespace AltaProject.Migrations
                     b.HasIndex("SurveyId");
 
                     b.ToTable("Questions");
-                });
-
-            modelBuilder.Entity("AltaProject.Entity.Receiver", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("GuestId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("NotificationId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuestId")
-                        .IsUnique();
-
-                    b.HasIndex("NotificationId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Receivers");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.Role", b =>
@@ -340,15 +282,14 @@ namespace AltaProject.Migrations
                     b.Property<int>("AreaId")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("IsActived")
+                        .HasColumnType("boolean");
+
                     b.Property<float>("Rate")
                         .HasColumnType("real");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -406,6 +347,30 @@ namespace AltaProject.Migrations
                     b.ToTable("Times");
                 });
 
+            modelBuilder.Entity("AltaProject.Entity.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("AltaProject.Entity.VisitPlan", b =>
                 {
                     b.Property<int>("Id")
@@ -440,7 +405,10 @@ namespace AltaProject.Migrations
             modelBuilder.Entity("AltaProject.Entity.VisitTask", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AssigneeStaffId")
                         .HasColumnType("integer");
@@ -448,6 +416,9 @@ namespace AltaProject.Migrations
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -475,6 +446,8 @@ namespace AltaProject.Migrations
                     b.HasIndex("AssigneeStaffId")
                         .IsUnique();
 
+                    b.HasIndex("CreatorUserId");
+
                     b.ToTable("Tasks");
                 });
 
@@ -498,6 +471,15 @@ namespace AltaProject.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_VisitTask_Comment");
+
+                    b.HasOne("AltaProject.Entity.User", "CommentUser")
+                        .WithMany("Comments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_User_Comment");
+
+                    b.Navigation("CommentUser");
 
                     b.Navigation("Task");
                 });
@@ -539,7 +521,16 @@ namespace AltaProject.Migrations
                         .WithMany("Guests")
                         .HasForeignKey("GuestGroupId");
 
+                    b.HasOne("AltaProject.Entity.User", "User")
+                        .WithOne("Guest")
+                        .HasForeignKey("AltaProject.Entity.Guest", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Guest_User");
+
                     b.Navigation("GuestGroup");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.GuestGroup", b =>
@@ -556,21 +547,44 @@ namespace AltaProject.Migrations
 
             modelBuilder.Entity("AltaProject.Entity.InternalUser", b =>
                 {
-                    b.HasOne("AltaProject.Entity.Role", null)
-                        .WithMany("Users")
-                        .HasForeignKey("RoleId");
+                    b.HasOne("AltaProject.Entity.User", "User")
+                        .WithOne("InternalUser")
+                        .HasForeignKey("AltaProject.Entity.InternalUser", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_InternalUser_User");
+
+                    b.HasOne("AltaProject.Entity.Role", "Role")
+                        .WithMany("InternalUsers")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_InternalUser_Role");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.Notification", b =>
                 {
                     b.HasOne("AltaProject.Entity.InternalUser", "SenderUser")
-                        .WithMany("Notifications")
+                        .WithMany("SendedNotifications")
                         .HasForeignKey("SenderUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_InternalUser_Notification");
+                        .HasConstraintName("FK_InternalUser_SendedNotification");
+
+                    b.HasOne("AltaProject.Entity.User", "UserReceiver")
+                        .WithMany("ReceivedNotification")
+                        .HasForeignKey("UserReceiverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_User_ReceiverNotification");
 
                     b.Navigation("SenderUser");
+
+                    b.Navigation("UserReceiver");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.Question", b =>
@@ -585,32 +599,6 @@ namespace AltaProject.Migrations
                     b.Navigation("Survey");
                 });
 
-            modelBuilder.Entity("AltaProject.Entity.Receiver", b =>
-                {
-                    b.HasOne("AltaProject.Entity.Guest", "Guest")
-                        .WithOne("Receiver")
-                        .HasForeignKey("AltaProject.Entity.Receiver", "GuestId")
-                        .HasConstraintName("FK_Guest_Receiver");
-
-                    b.HasOne("AltaProject.Entity.Notification", "Notification")
-                        .WithMany("Receivers")
-                        .HasForeignKey("NotificationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_Notification_Receiver");
-
-                    b.HasOne("AltaProject.Entity.InternalUser", "User")
-                        .WithOne("Receiver")
-                        .HasForeignKey("AltaProject.Entity.Receiver", "UserId")
-                        .HasConstraintName("FK_InternalUser_Receiver");
-
-                    b.Navigation("Guest");
-
-                    b.Navigation("Notification");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("AltaProject.Entity.Staff", b =>
                 {
                     b.HasOne("AltaProject.Entity.Area", "Area")
@@ -620,7 +608,7 @@ namespace AltaProject.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_Area_Staff");
 
-                    b.HasOne("AltaProject.Entity.InternalUser", "User")
+                    b.HasOne("AltaProject.Entity.InternalUser", "InternalUser")
                         .WithOne("Staff")
                         .HasForeignKey("AltaProject.Entity.Staff", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -629,7 +617,7 @@ namespace AltaProject.Migrations
 
                     b.Navigation("Area");
 
-                    b.Navigation("User");
+                    b.Navigation("InternalUser");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.Survey", b =>
@@ -683,8 +671,8 @@ namespace AltaProject.Migrations
                         .HasConstraintName("FK_VisitTask_Staff");
 
                     b.HasOne("AltaProject.Entity.InternalUser", "CreatorUser")
-                        .WithOne("Task")
-                        .HasForeignKey("AltaProject.Entity.VisitTask", "Id")
+                        .WithMany("Tasks")
+                        .HasForeignKey("CreatorUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_InternalUser_VisitTask");
@@ -712,11 +700,6 @@ namespace AltaProject.Migrations
                     b.Navigation("Plans");
                 });
 
-            modelBuilder.Entity("AltaProject.Entity.Guest", b =>
-                {
-                    b.Navigation("Receiver");
-                });
-
             modelBuilder.Entity("AltaProject.Entity.GuestGroup", b =>
                 {
                     b.Navigation("Guests");
@@ -727,30 +710,22 @@ namespace AltaProject.Migrations
                     b.Navigation("Article")
                         .IsRequired();
 
-                    b.Navigation("Notifications");
-
                     b.Navigation("Plan")
                         .IsRequired();
 
-                    b.Navigation("Receiver");
+                    b.Navigation("SendedNotifications");
 
                     b.Navigation("Staff")
                         .IsRequired();
 
                     b.Navigation("Surveys");
 
-                    b.Navigation("Task")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AltaProject.Entity.Notification", b =>
-                {
-                    b.Navigation("Receivers");
+                    b.Navigation("Tasks");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.Role", b =>
                 {
-                    b.Navigation("Users");
+                    b.Navigation("InternalUsers");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.Staff", b =>
@@ -767,6 +742,19 @@ namespace AltaProject.Migrations
             modelBuilder.Entity("AltaProject.Entity.Time", b =>
                 {
                     b.Navigation("Plans");
+                });
+
+            modelBuilder.Entity("AltaProject.Entity.User", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Guest")
+                        .IsRequired();
+
+                    b.Navigation("InternalUser")
+                        .IsRequired();
+
+                    b.Navigation("ReceivedNotification");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.VisitPlan", b =>

@@ -3,6 +3,7 @@ using System;
 using AltaProject.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AltaProject.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230510153245_fixedDatabase-removeReceiverEntity-fixedUserEntity-InternalUserEntity-GuestEntity-ForeignKey")]
+    partial class fixedDatabaseremoveReceiverEntityfixedUserEntityInternalUserEntityGuestEntityForeignKey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,15 +86,10 @@ namespace AltaProject.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("CommentUserId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("TaskId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CommentUserId");
 
                     b.HasIndex("TaskId");
 
@@ -403,10 +400,7 @@ namespace AltaProject.Migrations
             modelBuilder.Entity("AltaProject.Entity.VisitTask", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AssigneeStaffId")
                         .HasColumnType("integer");
@@ -414,9 +408,6 @@ namespace AltaProject.Migrations
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("CreatorUserId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -444,8 +435,6 @@ namespace AltaProject.Migrations
                     b.HasIndex("AssigneeStaffId")
                         .IsUnique();
 
-                    b.HasIndex("CreatorUserId");
-
                     b.ToTable("Tasks");
                 });
 
@@ -463,23 +452,14 @@ namespace AltaProject.Migrations
 
             modelBuilder.Entity("AltaProject.Entity.Comment", b =>
                 {
-                    b.HasOne("AltaProject.Entity.User", "CommentUser")
-                        .WithMany("Comments")
-                        .HasForeignKey("CommentUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_User_Comment");
-
-                    b.HasOne("AltaProject.Entity.VisitTask", "VisitTask")
+                    b.HasOne("AltaProject.Entity.VisitTask", "Task")
                         .WithMany("Comments")
                         .HasForeignKey("TaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_VisitTask_Comment");
 
-                    b.Navigation("CommentUser");
-
-                    b.Navigation("VisitTask");
+                    b.Navigation("Task");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.Distributor", b =>
@@ -669,8 +649,8 @@ namespace AltaProject.Migrations
                         .HasConstraintName("FK_VisitTask_Staff");
 
                     b.HasOne("AltaProject.Entity.InternalUser", "CreatorUser")
-                        .WithMany("Tasks")
-                        .HasForeignKey("CreatorUserId")
+                        .WithOne("Task")
+                        .HasForeignKey("AltaProject.Entity.VisitTask", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_InternalUser_VisitTask");
@@ -718,7 +698,8 @@ namespace AltaProject.Migrations
 
                     b.Navigation("Surveys");
 
-                    b.Navigation("Tasks");
+                    b.Navigation("Task")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AltaProject.Entity.Role", b =>
@@ -744,8 +725,6 @@ namespace AltaProject.Migrations
 
             modelBuilder.Entity("AltaProject.Entity.User", b =>
                 {
-                    b.Navigation("Comments");
-
                     b.Navigation("Guest")
                         .IsRequired();
 

@@ -35,6 +35,8 @@ namespace AltaProject
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
             //Add Repositories
             builder.Services.AddTransient<IUserRepository, UserRepository>();
+            builder.Services.AddTransient<IVisitPlanRepository, VisitPlanRepository>();
+            builder.Services.AddTransient<INotificationRepository, NotificationRepository>();
             //Add services
             builder.Services.AddTransient<IEmailService, EmailService>();
             builder.Services.AddTransient<IHashPassword, HashPassword>();
