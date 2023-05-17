@@ -65,13 +65,15 @@ namespace AltaProject.Data
                 })
                 .Entity<VisitTask>(vt =>
                 {
-                    vt.HasOne(vt => vt.AssigneeStaff).WithOne(vt => vt.Task).HasForeignKey<VisitTask>(vt => vt.AssigneeStaffId).HasConstraintName("FK_VisitTask_Staff");
+                    vt.HasOne(vt => vt.AssigneeStaff).WithMany(vt => vt.Tasks).HasForeignKey(vt => vt.AssigneeStaffId).HasConstraintName("FK_VisitTask_Staff");
                     vt.HasMany(vt => vt.Files).WithOne(vt => vt.Task).HasForeignKey(vt => vt.TaskId).HasConstraintName("FK_VisitTask_FileImage");
                     vt.HasMany(vt => vt.Comments).WithOne(vt => vt.VisitTask).HasForeignKey(vt => vt.TaskId).HasConstraintName("FK_VisitTask_Comment");
                 })
                 .Entity<Survey>(s =>
                 {
                     s.HasMany(s => s.Questions).WithOne(s => s.Survey).HasForeignKey(s => s.SurveyId).HasConstraintName("FK_Survey_Question");
+                    s.HasOne(s => s.CreatorUser).WithMany(iu => iu.Surveys).HasForeignKey(s => s.CreatorUserId).HasConstraintName("FK_InternalUser_Survey");
+                    s.HasMany(s => s.ImplementUsers).WithMany(u => u.Surveys).UsingEntity("User_Survey");
                 })
                 .Entity<Guest>(g =>
                 {

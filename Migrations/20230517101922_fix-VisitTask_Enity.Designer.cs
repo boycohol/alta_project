@@ -3,6 +3,7 @@ using System;
 using AltaProject.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AltaProject.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230517101922_fix-VisitTask_Enity")]
+    partial class fixVisitTask_Enity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -304,14 +306,13 @@ namespace AltaProject.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CreatorUserId")
-                        .IsRequired()
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("EndDate")
+                    b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime?>("StartDate")
+                    b.Property<int>("ImplementUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
@@ -324,7 +325,7 @@ namespace AltaProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatorUserId");
+                    b.HasIndex("ImplementUserId");
 
                     b.ToTable("Surveys");
                 });
@@ -409,7 +410,7 @@ namespace AltaProject.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AssigneeStaffId")
+                    b.Property<int>("AssigneeStaffId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Category")
@@ -447,21 +448,6 @@ namespace AltaProject.Migrations
                     b.HasIndex("CreatorUserId");
 
                     b.ToTable("Tasks");
-                });
-
-            modelBuilder.Entity("User_Survey", b =>
-                {
-                    b.Property<int>("ImplementUsersId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SurveysId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ImplementUsersId", "SurveysId");
-
-                    b.HasIndex("SurveysId");
-
-                    b.ToTable("User_Survey");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.Article", b =>
@@ -635,14 +621,13 @@ namespace AltaProject.Migrations
 
             modelBuilder.Entity("AltaProject.Entity.Survey", b =>
                 {
-                    b.HasOne("AltaProject.Entity.InternalUser", "CreatorUser")
+                    b.HasOne("AltaProject.Entity.InternalUser", "ImplementUser")
                         .WithMany("Surveys")
-                        .HasForeignKey("CreatorUserId")
+                        .HasForeignKey("ImplementUserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_InternalUser_Survey");
+                        .IsRequired();
 
-                    b.Navigation("CreatorUser");
+                    b.Navigation("ImplementUser");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.VisitPlan", b =>
@@ -680,6 +665,8 @@ namespace AltaProject.Migrations
                     b.HasOne("AltaProject.Entity.Staff", "AssigneeStaff")
                         .WithMany("Tasks")
                         .HasForeignKey("AssigneeStaffId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("FK_VisitTask_Staff");
 
                     b.HasOne("AltaProject.Entity.InternalUser", "CreatorUser")
@@ -692,21 +679,6 @@ namespace AltaProject.Migrations
                     b.Navigation("AssigneeStaff");
 
                     b.Navigation("CreatorUser");
-                });
-
-            modelBuilder.Entity("User_Survey", b =>
-                {
-                    b.HasOne("AltaProject.Entity.User", null)
-                        .WithMany()
-                        .HasForeignKey("ImplementUsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AltaProject.Entity.Survey", null)
-                        .WithMany()
-                        .HasForeignKey("SurveysId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("AltaProject.Entity.Area", b =>

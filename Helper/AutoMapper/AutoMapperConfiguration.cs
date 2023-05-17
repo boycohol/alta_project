@@ -27,6 +27,10 @@ namespace AltaProject.Helper.AutoMapper
                .ForMember(dst => dst.Rating, opt => opt.MapFrom(src => src.Rating))
                .ForMember(dst => dst.AssigneeStaffId, opt => opt.MapFrom(src => src.AssigneeStaffId))
                .ForMember(dst => dst.CreatorUserId, opt => opt.MapFrom(src => src.CreatorUserId))
+               .ForMember(dst => dst.StartDate, opt => opt.Ignore())
+               .ForMember(dst => dst.EndDate, opt => opt.Ignore())
+               .ForMember(dst => dst.Files, opt => opt.Ignore())
+               .ForMember(dst => dst.Comments, opt => opt.Ignore())
                .ReverseMap();
         }
     }

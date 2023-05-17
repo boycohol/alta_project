@@ -10,17 +10,17 @@ namespace AltaProject.Entity
         public string Description { get; set; }
         public string Status { get; set; }
         public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public string Category { get; set; }
-        public float Rating { get; set; }
+        public float? Rating { get; set; }
 
         public int CreatorUserId { get; set; }
         public virtual InternalUser CreatorUser { get; set; }
 
-        public int AssigneeStaffId { get; set; }
-        public virtual Staff AssigneeStaff { get; set; }
+        public int? AssigneeStaffId { get; set; }
+        public virtual Staff? AssigneeStaff { get; set; }
 
-        public virtual ICollection<FileImage> Files { get; set; }
-        public virtual ICollection<Comment> Comments { get; set; }
+        public virtual ICollection<FileImage>? Files { get; set; }
+        public virtual ICollection<Comment>? Comments { get; set; }
     }
 }

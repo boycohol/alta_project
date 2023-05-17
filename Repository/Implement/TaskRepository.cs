@@ -22,13 +22,22 @@ namespace AltaProject.Repository.Implement
         }
         public async Task<ResponseModel> createTaskAsync(TaskModel taskModel)
         {
-            var task = mapper.Map<VisitTask>(taskModel);
+            var task = new VisitTask()
+            {
+                Title = taskModel.Title,
+                Description = taskModel.Description,
+                Status = taskModel.Status,
+                StartDate = DateTime.Parse(taskModel.StartDate).ToUniversalTime(),
+                Category = taskModel.Category,
+                Rating = taskModel.Rating,
+                CreatorUserId = taskModel.CreatorUserId,
+            };
             var user = await context.InternalUsers.FirstOrDefaultAsync(x => x.Id == taskModel.CreatorUserId);
             if (user == null)
             {
                 return new ResponseModel(System.Net.HttpStatusCode.NotFound, "Creator Id not found", null);
             }
-            if (taskModel.AssigneeStaffId != -1)
+            if (taskModel.AssigneeStaffId != 0)
             {
                 var staff = await context.Staffs.FirstOrDefaultAsync(x => x.Id == taskModel.AssigneeStaffId);
                 if (staff == null)
@@ -36,6 +45,7 @@ namespace AltaProject.Repository.Implement
                     return new ResponseModel(System.Net.HttpStatusCode.NotFound, "Assignee Id not found", null);
                 }
                 task.AssigneeStaff = staff;
+
                 var notify = new NotificationModel()
                 {
                     Title = "You're have task" + taskModel.Title,
@@ -100,23 +110,46 @@ namespace AltaProject.Repository.Implement
             task.Title = taskModel.Title;
             task.Description = taskModel.Description;
             task.StartDate = DateTime.Parse(taskModel.StartDate).ToUniversalTime();
-            task.EndDate = DateTime.Parse(taskModel.EndDate).ToUniversalTime();
-            task.Category = taskModel.Category;
-            task.Rating = taskModel.Rating;
-            if (task.AssigneeStaffId != taskModel.AssigneeStaffId)
+            if (taskModel.EndDate != null)
             {
-                var staff = await context.Staffs.FirstOrDefaultAsync(x => x.Id == taskModel.AssigneeStaffId);
-                if (staff == null)
-                {
-                    return new ResponseModel(System.Net.HttpStatusCode.NotFound, "Assignee Id not found", null);
-                }
-                task.AssigneeStaff = staff;
-                task.AssigneeStaffId = taskModel.AssigneeStaffId;
+                task.EndDate = DateTime.Parse(taskModel.EndDate).ToUniversalTime();
             }
+
+            task.Category = taskModel.Category;
+            if (taskModel.Rating != null)
+            {
+                task.Rating = taskModel.Rating;
+            }
+            if (taskModel.AssigneeStaffId != 0)
+            {
+                if (task.AssigneeStaffId == null || task.AssigneeStaffId != taskModel.AssigneeStaffId)
+                {
+                    var staff = await context.Staffs.FirstOrDefaultAsync(x => x.Id == taskModel.AssigneeStaffId);
+                    if (staff == null)
+                    {
+                        return new ResponseModel(System.Net.HttpStatusCode.NotFound, "Assignee Id not found", null);
+                    }
+                    task.AssigneeStaff = staff;
+                    task.AssigneeStaffId = taskModel.AssigneeStaffId;
+                    var response = await notificationRepository.sendNotificationAsync(new NotificationModel()
+                    {
+                        Title = "You're have task" + taskModel.Title,
+                        Detail = taskModel.Description,
+                        SenderUserId = 0,
+                        UserReceiverId = taskModel.AssigneeStaffId
+                    });
+                }
+            }
+            else
+            {
+                task.AssigneeStaffId = null;
+                task.AssigneeStaff = null;
+            }
+            await context.SaveChangesAsync();
             return new ResponseModel(System.Net.HttpStatusCode.OK, "Success", null);
         }
 
-        public async Task<ResponseModel> getTaskByInfo(string info)
+        public async Task<ResponseModel> getTaskByInfoAsync(string info)
         {
             var taskModels = await context.Tasks.Where(x => x.Title.Contains(info) || x.Description.Contains(info)
             || x.Status.Contains(info) || x.StartDate.ToString().Contains(info) || x.EndDate.ToString().Contains(info)

@@ -23,7 +23,7 @@ namespace AltaProject.Repository.Implement
             {
                 var notifi = new Notification()
                 {
-                    SenderUser = notificationModel.SenderUserId != 0 ? sender : null,
+                    SenderUser = sender,
                     SenderUserId = notificationModel.SenderUserId,
                     Title = notificationModel.Title,
                     Detail = notificationModel.Detail,

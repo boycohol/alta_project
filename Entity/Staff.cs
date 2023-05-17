@@ -13,6 +13,6 @@ namespace AltaProject.Entity
 
         public int AreaId { get; set; }
         public virtual Area Area { get; set; }
-        public virtual VisitTask Task { get; set; }
+        public virtual ICollection<VisitTask> Tasks { get; set; }
     }
 }

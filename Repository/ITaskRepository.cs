@@ -11,6 +11,6 @@ namespace AltaProject.Repository
         public Task<ResponseModel> getTaskNotAssignedOrStartedAsync();
         public Task<ResponseModel> updateTaskAsync(int taskId, TaskModel taskModel);
         public Task<ResponseModel> deleteTaskAsync(int taskId);
-        public Task<ResponseModel> getTaskByInfo(string info);
+        public Task<ResponseModel> getTaskByInfoAsync(string info);
     }
 }

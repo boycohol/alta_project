@@ -37,6 +37,9 @@ namespace AltaProject
             builder.Services.AddTransient<IUserRepository, UserRepository>();
             builder.Services.AddTransient<IVisitPlanRepository, VisitPlanRepository>();
             builder.Services.AddTransient<INotificationRepository, NotificationRepository>();
+            builder.Services.AddTransient<ITaskRepository, TaskRepository>();
+            builder.Services.AddTransient<ICommentRepository, CommentRepository>();
+            builder.Services.AddTransient<ISurveyRepository, SurveyRepository>();
             //Add services
             builder.Services.AddTransient<IEmailService, EmailService>();
             builder.Services.AddTransient<IHashPassword, HashPassword>();

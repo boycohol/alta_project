@@ -23,10 +23,10 @@ namespace AltaProject.Controllers
             var response = await visitPlanRepository.createVisitPlanAsync(userId, planModel);
             return StatusCode((int)response.code, response);
         }
-        [HttpPost("delete")]
-        public async Task<IActionResult> deletePlan(int visitPlanId)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> deletePlan(int id)
         {
-            var response = await visitPlanRepository.deleteVisitPlanAsync(visitPlanId);
+            var response = await visitPlanRepository.deleteVisitPlanAsync(id);
             return StatusCode((int)response.code, response);
         }
         [HttpGet("{id}")]
