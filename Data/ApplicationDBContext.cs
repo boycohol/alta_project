@@ -17,9 +17,8 @@ namespace AltaProject.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Distributor> Distributors { get; set; }
         public DbSet<FileImage> File { get; set; }
-        public DbSet<GuestGroup> GuestGroups { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-        public DbSet<Question> Questions { get; set; }
+        public DbSet<Questionnaire> Questionnaire { get; set; }
         public DbSet<Staff> Staffs { get; set; }
         public DbSet<Survey> Surveys { get; set; }
         public DbSet<VisitTask> Tasks { get; set; }
@@ -49,6 +48,7 @@ namespace AltaProject.Data
                 .Entity<Distributor>(d =>
                 {
                     d.HasMany(d => d.Plans).WithOne(d => d.Distributor).HasForeignKey(d => d.DistributorId).HasConstraintName("FK_Distributor_Plan");
+                    d.HasOne(d => d.User).WithOne(u => u.Distributor).HasForeignKey<Distributor>(x => x.Id).HasConstraintName("FK_Distributor_User");
                 })
                 .Entity<Article>(a =>
                 {
@@ -61,7 +61,7 @@ namespace AltaProject.Data
                 .Entity<VisitPlan>(vp =>
                 {
                     vp.HasOne(vp => vp.Time).WithMany(vp => vp.Plans).HasForeignKey(vp => vp.TimeId).HasConstraintName("FK_VisitPlan_Time");
-                    vp.HasOne(vp => vp.GuestGroup).WithOne(vp => vp.Plan).HasForeignKey<GuestGroup>(vp => vp.Id).HasConstraintName("FK_VisitPlan_GuestGroup");
+                    vp.HasMany(vp => vp.Guests).WithMany(g => g.VisitPlans).UsingEntity("VisitPlan_Guest");
                 })
                 .Entity<VisitTask>(vt =>
                 {
@@ -71,7 +71,7 @@ namespace AltaProject.Data
                 })
                 .Entity<Survey>(s =>
                 {
-                    s.HasMany(s => s.Questions).WithOne(s => s.Survey).HasForeignKey(s => s.SurveyId).HasConstraintName("FK_Survey_Question");
+                    s.HasOne(s => s.Questionnaire).WithMany(s => s.Surveys).HasForeignKey(s => s.QuestionnaireId).HasConstraintName("FK_Survey_Questionnaire");
                     s.HasOne(s => s.CreatorUser).WithMany(iu => iu.Surveys).HasForeignKey(s => s.CreatorUserId).HasConstraintName("FK_InternalUser_Survey");
                     s.HasMany(s => s.ImplementUsers).WithMany(u => u.Surveys).UsingEntity("User_Survey");
                 })

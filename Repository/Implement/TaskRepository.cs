@@ -28,6 +28,7 @@ namespace AltaProject.Repository.Implement
                 Description = taskModel.Description,
                 Status = taskModel.Status,
                 StartDate = DateTime.Parse(taskModel.StartDate).ToUniversalTime(),
+                EndDate = DateTime.Parse(taskModel.EndDate).ToUniversalTime(),
                 Category = taskModel.Category,
                 Rating = taskModel.Rating,
                 CreatorUserId = taskModel.CreatorUserId,
@@ -153,7 +154,7 @@ namespace AltaProject.Repository.Implement
         {
             var taskModels = await context.Tasks.Where(x => x.Title.Contains(info) || x.Description.Contains(info)
             || x.Status.Contains(info) || x.StartDate.ToString().Contains(info) || x.EndDate.ToString().Contains(info)
-            || x.Category.Contains(info) || x.AssigneeStaff.InternalUser.User.Name.Contains(info))
+            || x.Category.Contains(info) || (x.AssigneeStaff != null && x.AssigneeStaff.InternalUser.User.Name.Contains(info)))
                 .Select(x => mapper.Map<TaskModel>(x)).ToListAsync();
             return new ResponseModel(System.Net.HttpStatusCode.OK, "Success", taskModels);
         }

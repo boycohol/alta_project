@@ -10,7 +10,7 @@ namespace AltaProject.Entity
         public string HyperText { get; set; }
         public string Description { get; set; }
         public string Status { get; set; }
-        public DateTime? CreatedDate { get; set; }
+        public DateTime CreatedDate { get; set; }
         public virtual InternalUser CreatorUser { get; set; }
         public virtual FileImage File { get; set; }
     }

@@ -21,32 +21,46 @@ namespace AltaProject.Repository.Implement
             this.mapper = mapper;
             this.notificationRepository = notificationRepository;
         }
-        public async Task<List<VisitPlanModel>> transferVisitPlantoModel(List<VisitPlan> plans)
+        private List<VisitPlanModel> transferVisitPlantoModel(List<VisitPlan> plans)
         {
             var planModels = new List<VisitPlanModel>();
             foreach (var plan in plans)
             {
-                var group = await context.GuestGroups.FirstOrDefaultAsync(g => g.Id == plan.GuestGroup.Id);
-                if (group != null)
+                var guestIds = new List<int>();
+                foreach (var g in plan.Guests)
                 {
-                    var guestIds = new List<int>();
-                    foreach (var g in group.Guests)
-                    {
-                        guestIds.Add(g.Id);
-                    }
-                    planModels.Add(new VisitPlanModel()
-                    {
-                        Date = plan.Date.ToShortDateString(),
-                        TimeId = plan.TimeId,
-                        Purpose = plan.Purpose,
-                        Status = plan.Status,
-                        DistributorId = plan.DistributorId,
-                        GuestIds = guestIds
-                    });
+                    guestIds.Add(g.Id);
                 }
+                planModels.Add(new VisitPlanModel()
+                {
+                    Date = plan.Date.ToShortDateString(),
+                    TimeId = plan.TimeId,
+                    Purpose = plan.Purpose,
+                    Status = plan.Status,
+                    DistributorId = plan.DistributorId,
+                    GuestIds = guestIds
+                });
+
             }
 
             return planModels;
+        }
+        private bool isUserIdInThere(ICollection<Guest> guests, int userId)
+        {
+            foreach (var g in guests)
+            {
+                if (g.Id == userId) return true;
+            }
+            return false;
+        }
+        private bool isGuestBusy(Guest guest, string date)
+        {
+            foreach (var plan in guest.VisitPlans)
+            {
+                DateTime dateTime = DateTime.Parse(date).ToUniversalTime();
+                if (dateTime == plan.Date) return true;
+            }
+            return false;
         }
         public async Task<ResponseModel> createVisitPlanAsync(int userId, VisitPlanModel planModel)
         {
@@ -60,7 +74,7 @@ namespace AltaProject.Repository.Implement
             {
                 return new ResponseModel(System.Net.HttpStatusCode.BadRequest, "Distributor id is not found", null);
             }
-            /* var guestList = new List<Guest>();*/
+            var busyGuestIds = new List<int>();
 
             foreach (var id in planModel.GuestIds)
             {
@@ -68,6 +82,11 @@ namespace AltaProject.Repository.Implement
                 if (guest != null)
                 {
                     /*guestList.Add(guest);*/
+                    if (isGuestBusy(guest, planModel.Date))
+                    {
+                        busyGuestIds.Add(id);
+                        continue;
+                    }
                     var notifi = new NotificationModel()
                     {
                         Title = "Visit Plan Notification",
@@ -88,10 +107,7 @@ namespace AltaProject.Repository.Implement
                 RequestorUser = user,
                 DistributorId = planModel.DistributorId,
                 Distributor = distributor,
-                GuestGroup = new GuestGroup()
-                {
-                    Guests = new List<Guest>()
-                }
+                Guests = new List<Guest>()
             };
             context.VisitPlans.Add(plan);
             await context.SaveChangesAsync();
@@ -118,7 +134,7 @@ namespace AltaProject.Repository.Implement
                 return new ResponseModel(System.Net.HttpStatusCode.BadRequest, "Visit plan Id not found", null);
             }
             var plans = new List<VisitPlan>() { plan };
-            var planModel = await transferVisitPlantoModel(plans);
+            var planModel = transferVisitPlantoModel(plans);
             return new ResponseModel(System.Net.HttpStatusCode.OK, "Success", planModel);
         }
 
@@ -133,10 +149,10 @@ namespace AltaProject.Repository.Implement
             }
             else
             {
-                plans = await context.VisitPlans.Where(vp => vp.GuestGroup.Id == guest.GuestGroupId)
+                plans = await context.VisitPlans.Where(vp => isUserIdInThere(vp.Guests, userId))
                    .ToListAsync();
             }
-            var planModels = await transferVisitPlantoModel(plans);
+            var planModels = transferVisitPlantoModel(plans);
             return new ResponseModel(System.Net.HttpStatusCode.OK, "Success!", planModels);
         }
 
@@ -151,8 +167,8 @@ namespace AltaProject.Repository.Implement
             var plans = await context.VisitPlans.Where(p =>
             p.Date.ToString().Contains(information)
             || p.Purpose.Contains(information)
-            || p.Distributor.Name.Contains(information)).ToListAsync();
-            var planModels = await transferVisitPlantoModel(plans);
+            || p.Distributor.User.Name.Contains(information)).ToListAsync();
+            var planModels = transferVisitPlantoModel(plans);
             //or search guest info... after
             return new ResponseModel(System.Net.HttpStatusCode.OK, "Success", planModels);
         }
@@ -170,7 +186,7 @@ namespace AltaProject.Repository.Implement
                 return new ResponseModel(System.Net.HttpStatusCode.BadRequest, "Distributor Id not found", null);
             }
             //Find Guest
-            var guests = plan.GuestGroup.Guests;
+            var guests = plan.Guests;
             var guestIds = new List<int>();
             foreach (var g in guests)
             {
@@ -204,6 +220,7 @@ namespace AltaProject.Repository.Implement
                 }
                 guests.Add(addGuest);
             }
+            await context.SaveChangesAsync();
             return new ResponseModel(System.Net.HttpStatusCode.OK, "Success", null);
         }
 
@@ -219,7 +236,7 @@ namespace AltaProject.Repository.Implement
             {
                 return new ResponseModel(System.Net.HttpStatusCode.NotFound, "User Id not found", null);
             }
-            plan.GuestGroup.Guests.Add(guest);
+            plan.Guests.Add(guest);
             await context.SaveChangesAsync();
             return new ResponseModel(System.Net.HttpStatusCode.OK, "Success", null);
         }

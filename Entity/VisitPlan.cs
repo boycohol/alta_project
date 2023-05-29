@@ -13,7 +13,7 @@ namespace AltaProject.Entity
         public int TimeId { get; set; }
         public virtual Time Time { get; set; }
 
-        public virtual GuestGroup GuestGroup { get; set; }
+        public virtual ICollection<Guest> Guests { get; set; }
         public virtual InternalUser RequestorUser { get; set; }
 
         public int DistributorId { get; set; }

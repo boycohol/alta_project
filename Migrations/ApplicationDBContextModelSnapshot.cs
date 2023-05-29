@@ -102,10 +102,7 @@ namespace AltaProject.Migrations
             modelBuilder.Entity("AltaProject.Entity.Distributor", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -113,14 +110,6 @@ namespace AltaProject.Migrations
 
                     b.Property<int>("AreaId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -163,28 +152,13 @@ namespace AltaProject.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<int?>("GuestGroupId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuestGroupId");
-
                     b.ToTable("Guests");
-                });
-
-            modelBuilder.Entity("AltaProject.Entity.GuestGroup", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("GuestGroups");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.InternalUser", b =>
@@ -464,6 +438,21 @@ namespace AltaProject.Migrations
                     b.ToTable("User_Survey");
                 });
 
+            modelBuilder.Entity("VisitPlan_Guest", b =>
+                {
+                    b.Property<int>("GuestsId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("VisitPlansId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("GuestsId", "VisitPlansId");
+
+                    b.HasIndex("VisitPlansId");
+
+                    b.ToTable("VisitPlan_Guest");
+                });
+
             modelBuilder.Entity("AltaProject.Entity.Article", b =>
                 {
                     b.HasOne("AltaProject.Entity.InternalUser", "CreatorUser")
@@ -506,7 +495,16 @@ namespace AltaProject.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_Area_Distributor");
 
+                    b.HasOne("AltaProject.Entity.User", "User")
+                        .WithOne("Distributor")
+                        .HasForeignKey("AltaProject.Entity.Distributor", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Distributor_User");
+
                     b.Navigation("Area");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.FileImage", b =>
@@ -530,10 +528,6 @@ namespace AltaProject.Migrations
 
             modelBuilder.Entity("AltaProject.Entity.Guest", b =>
                 {
-                    b.HasOne("AltaProject.Entity.GuestGroup", "GuestGroup")
-                        .WithMany("Guests")
-                        .HasForeignKey("GuestGroupId");
-
                     b.HasOne("AltaProject.Entity.User", "User")
                         .WithOne("Guest")
                         .HasForeignKey("AltaProject.Entity.Guest", "Id")
@@ -541,21 +535,7 @@ namespace AltaProject.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_Guest_User");
 
-                    b.Navigation("GuestGroup");
-
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("AltaProject.Entity.GuestGroup", b =>
-                {
-                    b.HasOne("AltaProject.Entity.VisitPlan", "Plan")
-                        .WithOne("GuestGroup")
-                        .HasForeignKey("AltaProject.Entity.GuestGroup", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_VisitPlan_GuestGroup");
-
-                    b.Navigation("Plan");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.InternalUser", b =>
@@ -709,6 +689,21 @@ namespace AltaProject.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("VisitPlan_Guest", b =>
+                {
+                    b.HasOne("AltaProject.Entity.Guest", null)
+                        .WithMany()
+                        .HasForeignKey("GuestsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AltaProject.Entity.VisitPlan", null)
+                        .WithMany()
+                        .HasForeignKey("VisitPlansId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AltaProject.Entity.Area", b =>
                 {
                     b.Navigation("Distributors");
@@ -725,11 +720,6 @@ namespace AltaProject.Migrations
             modelBuilder.Entity("AltaProject.Entity.Distributor", b =>
                 {
                     b.Navigation("Plans");
-                });
-
-            modelBuilder.Entity("AltaProject.Entity.GuestGroup", b =>
-                {
-                    b.Navigation("Guests");
                 });
 
             modelBuilder.Entity("AltaProject.Entity.InternalUser", b =>
@@ -774,6 +764,9 @@ namespace AltaProject.Migrations
                 {
                     b.Navigation("Comments");
 
+                    b.Navigation("Distributor")
+                        .IsRequired();
+
                     b.Navigation("Guest")
                         .IsRequired();
 
@@ -781,12 +774,6 @@ namespace AltaProject.Migrations
                         .IsRequired();
 
                     b.Navigation("ReceivedNotification");
-                });
-
-            modelBuilder.Entity("AltaProject.Entity.VisitPlan", b =>
-                {
-                    b.Navigation("GuestGroup")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("AltaProject.Entity.VisitTask", b =>

@@ -7,6 +7,7 @@ namespace AltaProject.Entity
         [Key]
         public int Id { get; set; }
         public string CommentText { get; set; }
+        public DateTime CommentDay { get; set; }
 
         public int CommentUserId { get; set; }
         public virtual User CommentUser { get; set; }

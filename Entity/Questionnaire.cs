@@ -2,13 +2,13 @@
 
 namespace AltaProject.Entity
 {
-    public class Question
+    public class Questionnaire
     {
         [Key]
         public int Id { get; set; }
+        public bool isAvailabe { get; set; }
         public string QuestionText { get; set; }
-
-        public int SurveyId { get; set; }
-        public virtual Survey Survey { get; set; }
+        public List<string> Answers { get; set; }
+        public virtual ICollection<Survey> Surveys { get; set; }
     }
 }

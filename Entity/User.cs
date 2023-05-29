@@ -14,6 +14,7 @@ namespace AltaProject.Entity
         public string? PhoneNumber { get; set; }
         public virtual InternalUser InternalUser { get; set; }
         public virtual Guest Guest { get; set; }
+        public virtual Distributor Distributor { get; set; }
         public virtual ICollection<Notification> ReceivedNotification { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }
         public virtual ICollection<Survey> Surveys { get; set; }

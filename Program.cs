@@ -1,19 +1,19 @@
 using AltaProject.Data;
-using AltaProject.Entity;
 using AltaProject.Helper.Email;
 using AltaProject.Repository.Implement;
 using AltaProject.Repository;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Graph;
 using Microsoft.Identity.Web;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
 using AltaProject.Service;
 using AltaProject.Service.Implement;
+using Quartz;
+using AltaProject.Helper.JobScheduler;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+
 
 namespace AltaProject
 {
@@ -31,8 +31,10 @@ namespace AltaProject
 
             //Add Jwt in swaggerGen
             builder.Services.AddSwaggerGen();
+
             //Add AutoMapper
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
             //Add Repositories
             builder.Services.AddTransient<IUserRepository, UserRepository>();
             builder.Services.AddTransient<IVisitPlanRepository, VisitPlanRepository>();
@@ -40,10 +42,36 @@ namespace AltaProject
             builder.Services.AddTransient<ITaskRepository, TaskRepository>();
             builder.Services.AddTransient<ICommentRepository, CommentRepository>();
             builder.Services.AddTransient<ISurveyRepository, SurveyRepository>();
+            builder.Services.AddTransient<IArticleRepository, ArticleRepository>();
+
             //Add services
             builder.Services.AddTransient<IEmailService, EmailService>();
             builder.Services.AddTransient<IHashPassword, HashPassword>();
             builder.Services.AddTransient<ITokenService, TokenService>();
+
+            //Add Quartz - scheduler
+            builder.Services.AddQuartz(q =>
+            {
+                var jobKey = new JobKey("Reminder");
+
+                q.AddJob<BackgroundJob>(option =>
+                {
+                    option.WithIdentity(jobKey);
+                });
+
+                q.AddTrigger(option =>
+                {
+                    option.ForJob(jobKey)
+                    .WithIdentity("ReminderTrigger")
+                    .WithCronSchedule("0 0 23 * * ?");
+                });
+
+                q.UseMicrosoftDependencyInjectionJobFactory();
+            });
+            builder.Services.AddQuartzHostedService(option =>
+            {
+                option.WaitForJobsToComplete = true;
+            });
 
             //Add Email Configs
             builder.Services.AddSingleton(builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>());

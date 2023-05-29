@@ -27,11 +27,39 @@ namespace AltaProject.Helper.AutoMapper
                .ForMember(dst => dst.Rating, opt => opt.MapFrom(src => src.Rating))
                .ForMember(dst => dst.AssigneeStaffId, opt => opt.MapFrom(src => src.AssigneeStaffId))
                .ForMember(dst => dst.CreatorUserId, opt => opt.MapFrom(src => src.CreatorUserId))
-               .ForMember(dst => dst.StartDate, opt => opt.Ignore())
-               .ForMember(dst => dst.EndDate, opt => opt.Ignore())
-               .ForMember(dst => dst.Files, opt => opt.Ignore())
-               .ForMember(dst => dst.Comments, opt => opt.Ignore())
-               .ReverseMap();
+               .ForMember(dst => dst.StartDate, opt => opt.MapFrom(src => src.StartDate.ToShortDateString()))
+               .ForMember(dst => dst.EndDate, opt => opt.MapFrom(src => src.EndDate.ToShortDateString()))
+               .ForMember(dst => dst.Files, opt => opt.MapFrom(src => getIdsOfFiles(src.Files)))
+               .ForMember(dst => dst.Comments, opt => opt.MapFrom(src => getLastComments(src.Comments)));
+
+        }
+        private List<int> getLastComments(ICollection<Comment> comments)
+        {
+            var listIds = new List<int>();
+            List<Comment> commentList = new List<Comment>(comments);
+            commentList.Reverse();
+            foreach (var comment in commentList)
+            {
+                listIds.Add(comment.Id);
+            }
+            if (listIds.Count > 3)
+            {
+                listIds = listIds.Take(3).ToList();
+            }
+            return listIds;
+        }
+        private List<int> getIdsOfFiles(ICollection<FileImage> files)
+        {
+            var listIds = new List<int>();
+            if (files != null)
+            {
+                foreach (var file in files)
+                {
+                    listIds.Add(file.Id);
+                }
+            }
+
+            return listIds;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using AltaProject.Model.AuthModel;
+﻿using AltaProject.Entity;
+using AltaProject.Model.AuthModel;
 using AltaProject.Model.EntityModel;
 using AltaProject.Repository;
 using AltaProject.Repository.Implement;

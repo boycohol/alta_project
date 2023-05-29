@@ -15,9 +15,7 @@ namespace AltaProject.Entity
         public string? Address { get; set; }
         public bool EmailConfirmed { get; set; }
         public virtual User User { get; set; }
-
-        public int? GuestGroupId { get; set; }
-        public virtual GuestGroup? GuestGroup { get; set; }
+        public virtual ICollection<VisitPlan> VisitPlans { get; set; }
 
     }
 }
