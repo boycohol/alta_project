@@ -43,6 +43,7 @@ namespace AltaProject
             builder.Services.AddTransient<ICommentRepository, CommentRepository>();
             builder.Services.AddTransient<ISurveyRepository, SurveyRepository>();
             builder.Services.AddTransient<IArticleRepository, ArticleRepository>();
+            builder.Services.AddTransient<IAreaRepository, AreaRepository>();
 
             //Add services
             builder.Services.AddTransient<IEmailService, EmailService>();

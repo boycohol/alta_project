@@ -12,7 +12,11 @@ namespace AltaProject.Entity
         [DataType(DataType.PhoneNumber)]
         [Phone]
         public string? PhoneNumber { get; set; }
-        public virtual InternalUser InternalUser { get; set; }
+
+        public int AreaId { get; set; }
+        public virtual Area Area { get; set; }
+
+        public virtual InternalUser InUser { get; set; }
         public virtual Guest Guest { get; set; }
         public virtual Distributor Distributor { get; set; }
         public virtual ICollection<Notification> ReceivedNotification { get; set; }

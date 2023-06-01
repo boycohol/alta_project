@@ -38,12 +38,11 @@ namespace AltaProject.Data
                     iu.HasOne(iu => iu.Article).WithOne(a => a.CreatorUser).HasForeignKey<Article>(iu => iu.Id).HasConstraintName("FK_InternalUser_Article");
                     iu.HasMany(iu => iu.SendedNotifications).WithOne(n => n.SenderUser).HasForeignKey(n => n.SenderUserId).HasConstraintName("FK_InternalUser_SendedNotification");
                     iu.HasOne(iu => iu.Role).WithMany(r => r.InternalUsers).HasForeignKey(iu => iu.RoleId).HasConstraintName("FK_InternalUser_Role");
-                    iu.HasOne(iu => iu.User).WithOne(u => u.InternalUser).HasForeignKey<InternalUser>(iu => iu.Id).HasConstraintName("FK_InternalUser_User");
+                    iu.HasOne(iu => iu.User).WithOne(u => u.InUser).HasForeignKey<InternalUser>(iu => iu.Id).HasConstraintName("FK_InternalUser_User");
                 })
                 .Entity<Area>(a =>
                 {
-                    a.HasMany(a => a.Staffs).WithOne(a => a.Area).HasForeignKey(a => a.AreaId).HasConstraintName("FK_Area_Staff");
-                    a.HasMany(a => a.Distributors).WithOne(a => a.Area).HasForeignKey(a => a.AreaId).HasConstraintName("FK_Area_Distributor");
+                    a.HasMany(a => a.Users).WithOne(u => u.Area).HasForeignKey(u => u.AreaId).HasConstraintName("FK_User_Area");
                 })
                 .Entity<Distributor>(d =>
                 {

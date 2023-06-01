@@ -9,8 +9,6 @@ namespace AltaProject.Entity
         public string Address { get; set; }
 
         public virtual User User { get; set; }
-        public int AreaId { get; set; }
-        public virtual Area Area { get; set; }
         public virtual ICollection<VisitPlan> Plans { get; set; }
     }
 }

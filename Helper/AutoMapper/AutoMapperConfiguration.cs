@@ -12,7 +12,7 @@ namespace AltaProject.Helper.AutoMapper
                 .ForMember(dst => dst.FullName, opt => opt.MapFrom(src => src.InternalUser.User.Name))
                 .ForMember(dst => dst.Email, opt => opt.MapFrom(src => src.InternalUser.User.Email))
                 .ForMember(dst => dst.RoleId, opt => opt.MapFrom(src => src.InternalUser.RoleId))
-                .ForMember(dst => dst.AreaId, opt => opt.MapFrom(src => src.AreaId))
+                .ForMember(dst => dst.AreaId, opt => opt.MapFrom(src => src.InternalUser.User.AreaId))
                 .ReverseMap();
             /*CreateMap<VisitPlan, VisitPlanModel>()
                 .ForMember(dst => dst.TimeId, opt => opt.MapFrom(src => src.TimeId))

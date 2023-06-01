@@ -10,9 +10,6 @@ namespace AltaProject.Entity
         public float Rate { get; set; }
         public DateTime StartDate { get; set; }
         public virtual InternalUser InternalUser { get; set; }
-
-        public int AreaId { get; set; }
-        public virtual Area Area { get; set; }
         public virtual ICollection<VisitTask> Tasks { get; set; }
     }
 }

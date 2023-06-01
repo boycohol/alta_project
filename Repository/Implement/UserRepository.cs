@@ -144,9 +144,18 @@ namespace AltaProject.Repository.Implement
 
         public async Task<ResponseModel> AddUserAsync(StaffModel model)
         {
+            var area = await context.Area.FirstOrDefaultAsync(x => x.Id == model.AreaId);
+            if (area == null)
+            {
+                return new ResponseModel(System.Net.HttpStatusCode.NotFound, "Area Id not found", null);
+            }
+            var role = await context.Roles.FirstOrDefaultAsync(x => x.Id == model.RoleId);
+            if (role == null)
+            {
+                return new ResponseModel(System.Net.HttpStatusCode.NotFound, "Role Id not found", null);
+            }
             var staff = new Staff()
             {
-                AreaId = model.AreaId,
                 StartDate = DateTime.UtcNow,
                 IsActived = model.isActived,
                 Rate = 0,
@@ -155,9 +164,12 @@ namespace AltaProject.Repository.Implement
                     User = new User()
                     {
                         Email = model.Email,
-                        Name = model.FullName
+                        Name = model.FullName,
+                        Area = area,
+                        AreaId = model.AreaId,
                     },
                     RoleId = model.RoleId,
+                    Role = role
                 },
             };
             context.Staffs.Add(staff);
@@ -182,7 +194,7 @@ namespace AltaProject.Repository.Implement
             user.InternalUser.User.Name = model.FullName;
             user.InternalUser.User.Email = model.Email;
             user.InternalUser.RoleId = model.RoleId;
-            user.AreaId = model.AreaId;
+            user.InternalUser.User.AreaId = model.AreaId;
             user.IsActived = model.isActived;
             await context.SaveChangesAsync();
             return new ResponseModel(System.Net.HttpStatusCode.OK, "Success!", user.Id);
@@ -213,7 +225,7 @@ namespace AltaProject.Repository.Implement
         public async Task<ResponseModel> SearchUserAsync(string query)
         {
             var users = await context.Staffs.Where(x =>
-                x.Area.Name.Contains(query) ||
+                x.InternalUser.User.Area.Name.Contains(query) ||
                 x.InternalUser.User.Name.Contains(query) ||
                 x.InternalUser.User.Email.Contains(query) ||
                 x.InternalUser.Role.Name.Contains(query)

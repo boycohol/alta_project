@@ -8,7 +8,6 @@ namespace AltaProject.Entity
         public int Id { get; set; }
         public string Code { get; set; }
         public string Name { get; set; }
-        public virtual ICollection<Staff> Staffs { get; set;}
-        public virtual ICollection<Distributor> Distributors { get; set;}
+        public virtual ICollection<User> Users { get; set; }
     }
 }
